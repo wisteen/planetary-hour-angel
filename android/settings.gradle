@@ -1,0 +1,3 @@
+# Minimal settings.gradle for Flutter Android app
+include ':app'
+rootProject.name = 'planetary_hour_angel'
