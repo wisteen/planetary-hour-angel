@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'dart:io';
 
 void main() => runApp(PlanetHourAngelApp());
@@ -68,6 +70,7 @@ class _PlanetHourScreenState extends State<PlanetHourScreen> {
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
     _initNotifications();
     calculatePlanetaryHour();
     // Refresh every minute to keep display updated
@@ -82,22 +85,13 @@ class _PlanetHourScreenState extends State<PlanetHourScreen> {
     final InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-    
-    // Request notification permission (for Android 13+)
-    if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
-          flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      await androidPlugin?.requestPermission();
-    }
-    
     scheduleHourlyNotification();
   }
 
   void scheduleHourlyNotification() async {
     await flutterLocalNotificationsPlugin.cancelAll();
     final now = DateTime.now();
-
+    final location = tz.local;
     for (int i = 0; i < 24; i++) {
       final scheduledTime = now.add(Duration(hours: i));
       final targetTime = DateTime(
@@ -108,7 +102,6 @@ class _PlanetHourScreenState extends State<PlanetHourScreen> {
         0,
         0,
       );
-
       if (targetTime.isAfter(now)) {
         int weekday = targetTime.weekday;
         String dayRuler = dayRulers[weekday]!;
@@ -122,7 +115,7 @@ class _PlanetHourScreenState extends State<PlanetHourScreen> {
           i,
           'Planetary Hour: $planet',
           'Angel: $angel  Sigil: $symbol',
-          targetTime.toLocal(),
+          tz.TZDateTime.from(targetTime, location),
           const NotificationDetails(
             android: AndroidNotificationDetails(
               'planetary_channel',
@@ -133,7 +126,7 @@ class _PlanetHourScreenState extends State<PlanetHourScreen> {
               sound: RawResourceAndroidNotificationSound('notification'),
             ),
           ),
-          androidAllowWhileIdle: true,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
