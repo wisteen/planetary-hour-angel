@@ -9,7 +9,6 @@
     
     <application
         android:label="Planetary Hour Angel"
-        android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -23,18 +22,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
             <!-- Splash screen metadata -->
             <meta-data
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
                 android:resource="@drawable/launch_background" />
         </activity>
-        
         <!-- Flutter embedding v2 -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        
         <!-- Notification boot receiver -->
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
             android:enabled="true"
