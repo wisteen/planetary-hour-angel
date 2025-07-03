@@ -1,18 +1,39 @@
-name: Build APK
+name: Flutter Build
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.5'
-    - run: flutter pub get
-    - run: flutter build apk --release
-    - uses: actions/upload-artifact@v3
-      with:
-        name: planetary-hour-angel
-        path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Build AppBundle
+        run: flutter build appbundle --release
+
+      - name: Build iOS (simulator)
+        if: runner.os == 'macOS'
+        run: flutter build ios --simulator
